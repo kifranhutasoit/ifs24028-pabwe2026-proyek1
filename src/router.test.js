@@ -1,10 +1,14 @@
 import { createMemoryHistory } from 'vue-router'
-import { createAppRouter } from './router.js'
+import { createAppRouter, routes } from './router.js'
 
 async function go(path) {
   const router = createAppRouter(createMemoryHistory())
   await router.push(path)
   return router.currentRoute.value.fullPath
+}
+
+function flatten(list) {
+  return list.flatMap((route) => [route, ...flatten(route.children || [])])
 }
 
 describe('route guard', () => {
@@ -33,5 +37,10 @@ describe('route guard', () => {
     localStorage.setItem('accessToken', 't')
     expect(await go('/admin/users')).toBe('/admin/users')
     expect(await go('/admin/products')).toBe('/admin/products')
+  })
+  it('loads every lazy route component', async () => {
+    for (const route of flatten(routes)) {
+      if (typeof route.component === 'function') await route.component()
+    }
   })
 })
