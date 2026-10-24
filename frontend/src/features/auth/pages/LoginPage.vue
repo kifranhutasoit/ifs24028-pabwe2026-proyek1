@@ -20,16 +20,16 @@ async function submit() {
   <form class="space-y-4" @submit.prevent="submit">
     <h2 class="text-lg font-semibold">Masuk ke akun Anda</h2>
     <div>
-      <label for="login-email-input" class="block text-sm font-semibold mb-1">Email</label>
-      <input id="login-email-input" type="email" aria-label="Email" required :value="email" @input="onEmail"
+      <label for="username" class="block text-sm font-semibold mb-1">Email</label>
+      <input id="username" type="email" aria-label="Email" required :value="email" @input="onEmail"
         class="w-full rounded-lg border border-stone-500 px-3 py-2" />
     </div>
     <div>
-      <label for="login-password-input" class="block text-sm font-semibold mb-1">Kata sandi</label>
-      <input id="login-password-input" type="password" aria-label="Kata sandi" required :value="password" @input="onPassword"
+      <label for="password" class="block text-sm font-semibold mb-1">Kata sandi</label>
+      <input id="password" type="password" aria-label="Kata sandi" required :value="password" @input="onPassword"
         class="w-full rounded-lg border border-stone-500 px-3 py-2" />
     </div>
-    <button id="login-submit-button" type="submit" aria-label="Masuk"
+    <button id="btn-submit" type="submit" aria-label="Masuk"
       class="w-full rounded-lg bg-brand px-4 py-2 font-semibold text-white">Masuk</button>
     <p class="text-sm">Belum punya akun?
       <RouterLink to="/auth/register" class="font-semibold text-brand underline">Daftar</RouterLink>

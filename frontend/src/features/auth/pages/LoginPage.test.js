@@ -8,9 +8,9 @@ vi.mock('../api/authApi.js')
 vi.mock('../../../helpers/toolsHelper.js', () => ({ showErrorDialog: vi.fn() }))
 
 async function fillAndSubmit() {
-  await fireEvent.update(document.querySelector('#login-email-input'), 'a@b.c')
-  await fireEvent.update(document.querySelector('#login-password-input'), 'secret')
-  await fireEvent.click(document.querySelector('#login-submit-button'))
+  await fireEvent.update(document.querySelector('#username'), 'a@b.c')
+  await fireEvent.update(document.querySelector('#password'), 'secret')
+  await fireEvent.click(document.querySelector('#btn-submit'))
 }
 
 describe('LoginPage', () => {
