@@ -8,6 +8,7 @@ const MAX_JSON = 1024 * 1024
 const MAX_UPLOAD = 2 * 1024 * 1024
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/
+export const CATEGORIES = ['Elektronik', 'Buku', 'Pakaian', 'Perabot', 'Alat Tulis', 'Lainnya']
 const MIME = { png: 'image/png', jpg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp' }
 
 class HttpError extends Error {
@@ -30,10 +31,10 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
   const fileUrl = (req, name) => (name ? `${baseUrl(req)}/uploads/${name}` : '')
   const removeFile = (name) => { if (name) try { unlinkSync(join(uploadDir, basename(name))) } catch { /* sudah hilang */ } }
 
-  const publicUser = (req, u) => ({ id: u.id, name: u.name, email: u.email, photo: fileUrl(req, u.photo) })
+  const publicUser = (req, u) => ({ id: u.id, name: u.name, email: u.email, photo: fileUrl(req, u.photo), role: u.role })
   const author = (req, row) => ({ id: row.user_id, name: row.author_name, photo: fileUrl(req, row.author_photo) })
   const productRow = (req, r) => ({
-    id: r.id, user_id: r.user_id, title: r.title, description: r.description, start_bid: r.start_bid,
+    id: r.id, user_id: r.user_id, title: r.title, description: r.description, start_bid: r.start_bid, category: r.category,
     closed_at: r.closed_at, cover: fileUrl(req, r.cover), created_at: r.created_at, author: author(req, r),
   })
   const SELECT_PRODUCT = `SELECT p.*, u.name AS author_name, u.photo AS author_photo
@@ -99,7 +100,10 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
     const closedAt = typeof b.closed_at === 'string' ? b.closed_at : ''
     if (!TIMESTAMP.test(closedAt) || Number.isNaN(Date.parse(closedAt.replace(' ', 'T') + 'Z'))) fail(400, 'Format "Dijual hingga" tidak valid')
     if (isClosed(closedAt)) fail(400, '"Dijual hingga" harus berupa waktu di masa depan')
+    const category = b.category ?? 'Lainnya'
+    if (!CATEGORIES.includes(category)) fail(400, 'Kategori tidak valid')
     return {
+      category,
       title: text(b.title, 'Nama barang', 150),
       description: text(b.description, 'Deskripsi', 10000),
       start_bid: money(b.start_bid, 'Harga'),
@@ -134,6 +138,7 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
     const b = await jsonBody(req)
     const u = db.prepare('SELECT * FROM users WHERE email = ?').get(String(b.email ?? '').trim().toLowerCase())
     if (!u || typeof b.password !== 'string' || !checkPassword(b.password, u.password_hash)) fail(400, 'Email atau kata sandi salah')
+    if (!u.is_active) fail(403, 'Akun Anda dinonaktifkan oleh admin')
     return ok('Login berhasil', { token: signToken(u.id, jwtSecret) })
   })
 
@@ -174,6 +179,7 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
   route('GET', '/products', true, ({ req, user, query }) => {
     const where = [], args = []
     if (query.get('is_me') === '1') { where.push('p.user_id = ?'); args.push(user.id) }
+    if (CATEGORIES.includes(query.get('category'))) { where.push('p.category = ?'); args.push(query.get('category')) }
     if (query.get('is_closed') === '1') { where.push('p.closed_at <= ?'); args.push(nowLocal()) }
     if (query.get('is_closed') === '0') { where.push('p.closed_at > ?'); args.push(nowLocal()) }
     const sql = `${SELECT_PRODUCT} ${where.length ? `WHERE ${where.join(' AND ')}` : ''} ORDER BY p.id DESC`
@@ -182,8 +188,8 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
 
   route('POST', '/products', true, async ({ req, user }) => {
     const p = productInput(await jsonBody(req))
-    const { lastInsertRowid } = db.prepare('INSERT INTO products (user_id, title, description, start_bid, closed_at) VALUES (?, ?, ?, ?, ?)')
-      .run(user.id, p.title, p.description, p.start_bid, p.closed_at)
+    const { lastInsertRowid } = db.prepare('INSERT INTO products (user_id, title, description, start_bid, closed_at, category) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(user.id, p.title, p.description, p.start_bid, p.closed_at, p.category)
     return { status: 201, body: { status: 'success', message: 'Barang berhasil ditambahkan', data: { product_id: Number(lastInsertRowid) } } }
   })
 
@@ -211,8 +217,8 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
   route('PUT', '/products/(\\d+)', true, async ({ req, user, params }) => {
     const current = ownedProduct(params[0], user)
     const p = productInput(await jsonBody(req))
-    db.prepare('UPDATE products SET title = ?, description = ?, start_bid = ?, closed_at = ? WHERE id = ?')
-      .run(p.title, p.description, p.start_bid, p.closed_at, current.id)
+    db.prepare('UPDATE products SET title = ?, description = ?, start_bid = ?, closed_at = ?, category = ? WHERE id = ?')
+      .run(p.title, p.description, p.start_bid, p.closed_at, p.category, current.id)
     return ok('Barang berhasil diperbarui')
   })
 
@@ -225,7 +231,7 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
   })
 
   route('DELETE', '/products/(\\d+)', true, ({ user, params }) => {
-    const current = ownedProduct(params[0], user)
+    const current = user.role === 'admin' ? findProduct(params[0]) : ownedProduct(params[0], user)
     db.prepare('DELETE FROM products WHERE id = ?').run(current.id)
     removeFile(current.cover)
     return ok('Barang berhasil dihapus')
@@ -252,6 +258,62 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
     return ok('Tawaran berhasil dibatalkan')
   })
 
+  // ---------- admin ----------
+  const adminOnly = (user) => { if (user.role !== 'admin') fail(403, 'Hanya admin yang dapat mengakses ini') }
+  const count = (sql, ...args) => db.prepare(sql).get(...args).n
+
+  route('GET', '/admin/stats', true, ({ user }) => {
+    adminOnly(user)
+    const now = nowLocal()
+    return ok('Statistik', {
+      stats: {
+        users: count('SELECT COUNT(*) AS n FROM users'),
+        admins: count("SELECT COUNT(*) AS n FROM users WHERE role = 'admin'"),
+        banned: count('SELECT COUNT(*) AS n FROM users WHERE is_active = 0'),
+        products: count('SELECT COUNT(*) AS n FROM products'),
+        products_open: count('SELECT COUNT(*) AS n FROM products WHERE closed_at > ?', now),
+        products_closed: count('SELECT COUNT(*) AS n FROM products WHERE closed_at <= ?', now),
+        bids: count('SELECT COUNT(*) AS n FROM bids'),
+        by_category: CATEGORIES.map((name) => ({ name, total: count('SELECT COUNT(*) AS n FROM products WHERE category = ?', name) })),
+      },
+    })
+  })
+
+  route('GET', '/admin/users', true, ({ req, user }) => {
+    adminOnly(user)
+    const rows = db.prepare(`SELECT u.*,
+      (SELECT COUNT(*) FROM products WHERE user_id = u.id) AS product_count,
+      (SELECT COUNT(*) FROM bids WHERE user_id = u.id) AS bid_count
+      FROM users u ORDER BY u.id DESC`).all()
+    return ok('Daftar pengguna', {
+      users: rows.map((u) => ({ ...publicUser(req, u), is_active: Boolean(u.is_active), created_at: u.created_at, product_count: u.product_count, bid_count: u.bid_count })),
+    })
+  })
+
+  route('PUT', '/admin/users/(\\d+)', true, async ({ req, user, params }) => {
+    adminOnly(user)
+    const target = db.prepare('SELECT * FROM users WHERE id = ?').get(Number(params[0])) ?? fail(404, 'Pengguna tidak ditemukan')
+    if (target.id === user.id) fail(400, 'Anda tidak dapat mengubah akun Anda sendiri')
+    const b = await jsonBody(req)
+    const role = b.role ?? target.role
+    if (!['user', 'admin'].includes(role)) fail(400, 'Peran harus "user" atau "admin"')
+    if (b.is_active !== undefined && typeof b.is_active !== 'boolean') fail(400, 'is_active harus true atau false')
+    const active = b.is_active === undefined ? target.is_active : Number(b.is_active)
+    db.prepare('UPDATE users SET role = ?, is_active = ? WHERE id = ?').run(role, active, target.id)
+    return ok('Pengguna berhasil diperbarui')
+  })
+
+  route('DELETE', '/admin/users/(\\d+)', true, ({ user, params }) => {
+    adminOnly(user)
+    const target = db.prepare('SELECT * FROM users WHERE id = ?').get(Number(params[0])) ?? fail(404, 'Pengguna tidak ditemukan')
+    if (target.id === user.id) fail(400, 'Anda tidak dapat menghapus akun Anda sendiri')
+    const covers = db.prepare('SELECT cover FROM products WHERE user_id = ?').all(target.id)
+    db.prepare('DELETE FROM users WHERE id = ?').run(target.id)
+    covers.forEach((p) => removeFile(p.cover))
+    removeFile(target.photo)
+    return ok('Pengguna berhasil dihapus')
+  })
+
   // ---------- server ----------
   function serveUpload(req, res, pathname) {
     const file = join(uploadDir, basename(pathname))
@@ -274,7 +336,7 @@ export function createApp({ db, uploadDir, jwtSecret, publicUrl = '', timeZone =
     const payload = token && verifyToken(token, jwtSecret)
     if (!payload || db.prepare('SELECT 1 FROM revoked_tokens WHERE jti = ?').get(payload.jti)) return null
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(payload.sub)
-    return user ? { user, payload } : null
+    return user?.is_active ? { user, payload } : null
   }
 
   return async function handler(req, res) {

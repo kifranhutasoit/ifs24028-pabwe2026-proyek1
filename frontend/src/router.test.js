@@ -23,4 +23,15 @@ describe('route guard', () => {
   it('allows guests on auth pages', async () => {
     expect(await go('/auth/register')).toBe('/auth/register')
   })
+  it('shows the landing page to everyone', async () => {
+    expect(await go('/welcome')).toBe('/welcome')
+    localStorage.setItem('accessToken', 't')
+    expect(await go('/welcome')).toBe('/welcome')
+  })
+  it('protects the admin area with the login guard', async () => {
+    expect(await go('/admin/users')).toBe('/auth/login')
+    localStorage.setItem('accessToken', 't')
+    expect(await go('/admin/users')).toBe('/admin/users')
+    expect(await go('/admin/products')).toBe('/admin/products')
+  })
 })

@@ -12,7 +12,7 @@ vi.mock('../../../helpers/toolsHelper.js', async (orig) => ({
 
 const detail = (extra = {}) => ({
   success: true,
-  data: { product: { id: 7, user_id: 1, title: 'Lukisan', description: '**Cat** minyak', start_bid: 150000, closed_at: '2099-12-01 00:00:00', bids: [{ id: 1, bid: 200000, created_at: '2026-10-05T08:44:12.000000Z', user: { name: 'Budi' } }, { id: 2, bid: 100000, created_at: '2026-10-04T08:00:00.000000Z' }], author: { name: 'Sari', photo: '' }, ...extra } },
+  data: { product: { id: 7, user_id: 1, category: 'Buku', title: 'Lukisan', description: '**Cat** minyak', start_bid: 150000, closed_at: '2099-12-01 00:00:00', bids: [{ id: 1, bid: 200000, created_at: '2026-10-05T08:44:12.000000Z', user: { name: 'Budi' } }, { id: 2, bid: 100000, created_at: '2026-10-04T08:00:00.000000Z' }], author: { name: 'Sari', photo: '' }, ...extra } },
 })
 const click = (name) => fireEvent.click(screen.getByRole('button', { name }))
 const noDialog = () => expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -132,7 +132,7 @@ describe('DetailPage', () => {
     await waitFor(() => expect(showErrorDialog).toHaveBeenCalledWith('Gagal ubah'))
     await click('Simpan perubahan')
     await waitFor(() => expect(showSuccessDialog).toHaveBeenCalledWith('Diubah'))
-    expect(api.changeProduct).toHaveBeenLastCalledWith('7', { title: 'Baru', description: 'Desc baru', start_bid: 200000, closed_at: '2027-01-01 08:00:00' })
+    expect(api.changeProduct).toHaveBeenLastCalledWith('7', { title: 'Baru', category: 'Buku', description: 'Desc baru', start_bid: 200000, closed_at: '2027-01-01 08:00:00' })
     await waitFor(noDialog)
   })
 

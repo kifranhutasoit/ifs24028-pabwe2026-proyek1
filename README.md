@@ -8,6 +8,13 @@ oper-in/
 └── frontend/   Aplikasi web (Vue 3 + Pinia + Tailwind)
 ```
 
+## Fitur
+- **Halaman depan** (`/welcome`): pengenalan platform, kategori, cara kerja.
+- **Pengguna**: daftar/masuk, jual barang (dengan kategori dan foto), cari dan filter kategori, tawar dan batalkan tawaran, profil dan foto profil.
+- **Admin** (`/admin`): ringkasan statistik, kelola pengguna (jadikan admin, nonaktifkan, hapus), hapus barang siapa pun.
+
+Akun admin dibuat otomatis dari `ADMIN_EMAIL` dan `ADMIN_PASSWORD` di `backend/.env` saat backend dijalankan. Akun yang sudah ada dengan email itu akan dinaikkan menjadi admin.
+
 ## Menjalankan (butuh dua terminal)
 
 **Terminal 1: backend** (http://localhost:5000/api/v1)

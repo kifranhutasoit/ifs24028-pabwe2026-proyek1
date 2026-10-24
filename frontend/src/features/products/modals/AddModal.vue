@@ -2,13 +2,14 @@
 import { reactive, ref, computed } from 'vue'
 import ModalShell from './ModalShell.vue'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
+import { CATEGORIES } from '../categories.js'
 import { useProductsStore } from '../states/productsStore.js'
 import { showSuccessDialog, showErrorDialog, toApiTimestamp } from '../../../helpers/toolsHelper.js'
 
 const emit = defineEmits(['close', 'saved'])
 const store = useProductsStore()
 const defaultClosedAt = () => new Date(Date.now() + 7 * 864e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16)
-const form = reactive({ title: '', description: '', start_bid: '', closed_at: defaultClosedAt() })
+const form = reactive({ title: '', category: 'Lainnya', description: '', start_bid: '', closed_at: defaultClosedAt() })
 const photo = ref(null)
 const preview = computed(() => (photo.value ? URL.createObjectURL(photo.value) : ''))
 const pickPhoto = (event) => { photo.value = event.target.files[0] }
@@ -33,6 +34,10 @@ async function submit() {
     <form class="space-y-3" @submit.prevent="submit">
       <label for="product-title" class="block text-sm font-semibold">Nama barang</label>
       <input id="product-title" v-model="form.title" class="w-full rounded-lg border border-stone-500 px-3 py-2" />
+      <label for="product-category" class="block text-sm font-semibold">Kategori</label>
+      <select id="product-category" v-model="form.category" class="w-full rounded-lg border border-stone-500 px-3 py-2">
+        <option v-for="c in CATEGORIES" :key="c" :value="c">{{ c }}</option>
+      </select>
       <MarkdownEditor id="product-description" v-model="form.description" label="Deskripsi" />
       <label for="product-start-bid" class="block text-sm font-semibold">Harga</label>
       <input id="product-start-bid" v-model="form.start_bid" type="number" class="w-full rounded-lg border border-stone-500 px-3 py-2" />

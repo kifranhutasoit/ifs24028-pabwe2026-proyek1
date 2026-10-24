@@ -19,3 +19,10 @@ it('shows the profile in the navbar and logs out', async () => {
   expect(localStorage.getItem('accessToken')).toBeNull()
   expect(screen.getByRole('link', { name: 'Profil' })).toBeInTheDocument()
 })
+
+it('shows the admin link only to admins', async () => {
+  localStorage.setItem('accessToken', 't')
+  userApi.getMe.mockResolvedValue({ success: true, data: { user: { id: 1, name: 'Ani', email: 'a@x.id', photo: '', role: 'admin' } } })
+  renderWithProviders(ProductLayout)
+  expect(await screen.findByRole('link', { name: 'Admin' })).toHaveAttribute('href', '/admin')
+})

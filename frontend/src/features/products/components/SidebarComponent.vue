@@ -1,5 +1,8 @@
 <script setup>
-import { Store, Users, UserRound } from 'lucide-vue-next'
+import { Store, Users, UserRound, ShieldCheck } from 'lucide-vue-next'
+import { useUsersStore } from '../../users/states/usersStore.js'
+
+const users = useUsersStore()
 </script>
 
 <template>
@@ -8,6 +11,7 @@ import { Store, Users, UserRound } from 'lucide-vue-next'
       <RouterLink to="/" class="nav-link"><Store :size="18" aria-hidden="true" />Barang</RouterLink>
       <RouterLink to="/users" class="nav-link"><Users :size="18" aria-hidden="true" />Pengguna</RouterLink>
       <RouterLink to="/profile" class="nav-link"><UserRound :size="18" aria-hidden="true" />Profil</RouterLink>
+      <RouterLink v-if="users.profile?.role === 'admin'" to="/admin" class="nav-link"><ShieldCheck :size="18" aria-hidden="true" />Admin</RouterLink>
     </nav>
   </aside>
 </template>

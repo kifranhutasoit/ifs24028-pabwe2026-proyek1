@@ -9,7 +9,7 @@ vi.mock('../../../helpers/toolsHelper.js', async (orig) => ({
   ...(await orig()), showSuccessDialog: vi.fn(), showErrorDialog: vi.fn(),
 }))
 
-const list = { success: true, data: { products: [{ id: 1, title: 'Lukisan', start_bid: 150000, closed_at: '2099-12-01 00:00:00', cover: 'http://x/c.png', author: { name: 'Sari', photo: 'http://x/p.png' } }, { id: 2, title: 'Jam', start_bid: 5000, closed_at: '2000-01-01 00:00:00', author: { name: 'Budi', photo: '' } }] } }
+const list = { success: true, data: { products: [{ id: 1, title: 'Lukisan', category: 'Elektronik', start_bid: 150000, closed_at: '2099-12-01 00:00:00', cover: 'http://x/c.png', author: { name: 'Sari', photo: 'http://x/p.png' } }, { id: 2, title: 'Jam', category: 'Buku', start_bid: 5000, closed_at: '2000-01-01 00:00:00', author: { name: 'Budi', photo: '' } }] } }
 
 async function openAndFill() {
   await fireEvent.click(screen.getByRole('button', { name: 'Jual barang' }))
@@ -45,7 +45,7 @@ describe('HomePage', () => {
     renderWithProviders(HomePage)
     await openAndFill()
     await waitFor(() => expect(showSuccessDialog).toHaveBeenCalledWith('Dibuat'))
-    expect(api.addProduct).toHaveBeenCalledWith({ title: 'Baru', description: 'Desc', start_bid: 1000, closed_at: '2026-12-01 10:00:00' })
+    expect(api.addProduct).toHaveBeenCalledWith({ title: 'Baru', category: 'Lainnya', description: 'Desc', start_bid: 1000, closed_at: '2026-12-01 10:00:00' })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(api.getProducts).toHaveBeenCalledTimes(2)
   })
@@ -101,5 +101,24 @@ describe('HomePage', () => {
     const days = (new Date(value) - Date.now()) / 864e5
     expect(days).toBeGreaterThan(6.9)
     expect(days).toBeLessThan(7.1)
+  })
+
+  it('filters by category and can pick a category when selling', async () => {
+    api.addProduct.mockResolvedValue({ success: true, message: 'Dibuat' })
+    renderWithProviders(HomePage)
+    await screen.findByText('Rp 150.000')
+    await fireEvent.click(screen.getByRole('button', { name: 'Kategori Elektronik' }))
+    expect(screen.getByRole('button', { name: 'Kategori Elektronik' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Lukisan')).toBeInTheDocument()
+    expect(screen.queryByText('Jam')).not.toBeInTheDocument()
+    await fireEvent.click(screen.getByRole('button', { name: 'Kategori Semua' }))
+    expect(screen.getByText('Jam')).toBeInTheDocument()
+    await fireEvent.click(screen.getByRole('button', { name: 'Jual barang' }))
+    await fireEvent.update(screen.getByLabelText('Kategori', { selector: 'select' }), 'Buku')
+    await fireEvent.update(screen.getByLabelText('Nama barang'), 'Novel')
+    await fireEvent.update(screen.getByLabelText('Deskripsi'), 'Bagus')
+    await fireEvent.update(screen.getByLabelText('Harga'), '2000')
+    await fireEvent.click(screen.getByRole('button', { name: 'Simpan barang' }))
+    await waitFor(() => expect(api.addProduct).toHaveBeenCalledWith(expect.objectContaining({ title: 'Novel', category: 'Buku' })))
   })
 })

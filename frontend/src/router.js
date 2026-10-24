@@ -8,6 +8,11 @@ import HomePage from './features/products/pages/HomePage.vue'
 import DetailPage from './features/products/pages/DetailPage.vue'
 import UsersPage from './features/users/pages/UsersPage.vue'
 import ProfilePage from './features/users/pages/ProfilePage.vue'
+import LandingPage from './features/common/pages/LandingPage.vue'
+import AdminLayout from './features/admin/layouts/AdminLayout.vue'
+import AdminDashboardPage from './features/admin/pages/AdminDashboardPage.vue'
+import AdminUsersPage from './features/admin/pages/AdminUsersPage.vue'
+import AdminProductsPage from './features/admin/pages/AdminProductsPage.vue'
 import NotFoundPage from './features/common/pages/NotFoundPage.vue'
 
 export const routes = [
@@ -29,8 +34,18 @@ export const routes = [
       { path: 'products/:productId', component: DetailPage },
       { path: 'users', component: UsersPage },
       { path: 'profile', component: ProfilePage },
+      {
+        path: 'admin',
+        component: AdminLayout,
+        children: [
+          { path: '', component: AdminDashboardPage },
+          { path: 'users', component: AdminUsersPage },
+          { path: 'products', component: AdminProductsPage },
+        ],
+      },
     ],
   },
+  { path: '/welcome', component: LandingPage },
   { path: '/:pathMatch(.*)*', component: NotFoundPage },
 ]
 

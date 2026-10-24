@@ -18,5 +18,14 @@ export function fetchWithAuth(url, options = {}) {
 
 export const normalizeResponse = (json) => ({ ...json, success: json.status === 'success' })
 
-export const requestJson = async (path, options) =>
-  normalizeResponse(await (await fetchWithAuth(`${DELCOM_BASEURL}${path}`, options)).json())
+export const SERVER_UNREACHABLE = 'Server tidak dapat dihubungi. Pastikan backend sedang berjalan.'
+
+export async function readJson(request) {
+  try {
+    return normalizeResponse(await (await request).json())
+  } catch {
+    return normalizeResponse({ status: 'error', message: SERVER_UNREACHABLE })
+  }
+}
+
+export const requestJson = (path, options) => readJson(fetchWithAuth(`${DELCOM_BASEURL}${path}`, options))

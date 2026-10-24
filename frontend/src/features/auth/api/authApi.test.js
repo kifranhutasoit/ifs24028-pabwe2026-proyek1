@@ -1,4 +1,5 @@
 import { login, register, logout } from './authApi.js'
+import { SERVER_UNREACHABLE } from '../../../helpers/apiHelper.js'
 
 describe('authApi', () => {
   beforeEach(() => vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ json: async () => ({ status: 'success' }) })))
@@ -19,5 +20,10 @@ describe('authApi', () => {
     expect((await logout()).success).toBe(true)
     expect(fetch.mock.calls[0][0]).toMatch(/\/auth\/logout$/)
     expect(fetch.mock.calls[0][1].method).toBe('POST')
+  })
+
+  it('reports an unreachable server instead of throwing', async () => {
+    fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    expect(await login({ email: 'a@b.c', password: 'pw' })).toMatchObject({ success: false, message: SERVER_UNREACHABLE })
   })
 })

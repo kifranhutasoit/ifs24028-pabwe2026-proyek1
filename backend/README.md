@@ -30,6 +30,8 @@ Data tersimpan di `backend/data/oper-in.db`, foto di `backend/uploads/`. Hapus k
 | POST | /products/:id/cover | unggah foto barang (field `cover`) |
 | POST / DELETE | /products/:id/bids | kirim / batalkan tawaran |
 
+**Admin** (hanya peran `admin`): `GET /admin/stats`, `GET /admin/users`, `PUT /admin/users/:id` (`{role, is_active}`), `DELETE /admin/users/:id`. Admin juga boleh `DELETE /products/:id` milik siapa pun. Pengguna yang dinonaktifkan tidak bisa masuk dan tokennya langsung tidak berlaku. Daftar kategori: Elektronik, Buku, Pakaian, Perabot, Alat Tulis, Lainnya (filter `GET /products?category=Buku`).
+
 Aturan tawaran: bukan pemilik barang, barang belum ditutup, satu tawaran per pengguna, nominal harus lebih tinggi dari harga dan tawaran tertinggi.
 
 ## Deploy

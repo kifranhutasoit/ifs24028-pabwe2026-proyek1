@@ -4,6 +4,7 @@ import { useProductsStore } from '../states/productsStore.js'
 import UserAvatar from '../../users/components/UserAvatar.vue'
 import AddModal from '../modals/AddModal.vue'
 import { Plus, Search, PackageOpen, CalendarClock } from 'lucide-vue-next'
+import { CATEGORIES } from '../categories.js'
 import { formatRupiah, formatDate, isClosedAt } from '../../../helpers/toolsHelper.js'
 
 const store = useProductsStore()
@@ -15,9 +16,12 @@ const tabs = [
 ]
 const tab = ref('all')
 const search = ref('')
+const category = ref('Semua')
+const categoryOptions = ['Semua', ...CATEGORIES]
 const showAdd = ref(false)
 
-const shown = computed(() => store.products.filter((a) => a.title.toLowerCase().includes(search.value.toLowerCase())))
+const shown = computed(() => store.products.filter((a) =>
+  a.title.toLowerCase().includes(search.value.toLowerCase()) && (category.value === 'Semua' || a.category === category.value)))
 function load(t) {
   tab.value = t.id
   return store.loadProducts(t.filters)
@@ -46,6 +50,10 @@ onMounted(() => load(tabs[0]))
         <input v-model="search" type="search" aria-label="Cari barang" placeholder="Cari nama barang" class="w-full rounded-xl border border-stone-300 bg-white py-2 pl-10 pr-3 transition focus:border-brand focus:outline-2 focus:outline-brand/30" />
       </div>
     </div>
+    <div role="group" aria-label="Kategori" class="flex gap-2 overflow-x-auto pb-1">
+      <button v-for="c in categoryOptions" :key="c" type="button" :aria-pressed="category === c" :aria-label="`Kategori ${c}`"
+        class="shrink-0 rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm font-semibold text-stone-700 transition hover:border-accent hover:text-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-white" @click="category = c">{{ c }}</button>
+    </div>
     <p v-if="shown.length === 0" class="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-stone-600">Belum ada barang yang cocok.</p>
     <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       <li v-for="a in shown" :key="a.id">
@@ -59,7 +67,8 @@ onMounted(() => load(tabs[0]))
             <span v-else class="absolute left-3 top-3 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900 shadow-sm">Masih tersedia</span>
           </div>
           <div class="flex flex-1 flex-col gap-2 p-4">
-            <h2 class="line-clamp-2 min-h-[3rem] text-base font-bold leading-snug"><RouterLink :to="`/products/${a.id}`" class="text-stone-900 after:absolute after:inset-0 hover:text-brand">{{ a.title }}</RouterLink></h2>
+            <p class="text-xs font-bold uppercase tracking-wide text-brand/70">{{ a.category }}</p>
+            <h2 class="line-clamp-2 min-h-[2.5rem] text-base font-bold leading-snug"><RouterLink :to="`/products/${a.id}`" class="text-stone-900 after:absolute after:inset-0 hover:text-brand">{{ a.title }}</RouterLink></h2>
             <p class="text-xl font-extrabold text-accent">{{ formatRupiah(a.start_bid) }}</p>
             <p class="flex items-center gap-1.5 text-xs text-stone-600"><CalendarClock :size="14" aria-hidden="true" /><span>Dijual hingga {{ formatDate(a.closed_at) }}</span></p>
             <div class="mt-auto flex items-center gap-2 border-t border-stone-100 pt-3 text-sm text-stone-700">
