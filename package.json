@@ -1,0 +1,12 @@
+{
+  "name": "oper-in",
+  "private": true,
+  "scripts": {
+    "install:frontend": "npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test:backend": "npm --prefix backend test",
+    "test:frontend": "npm --prefix frontend test",
+    "build": "npm --prefix frontend run build"
+  }
+}

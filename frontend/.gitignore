@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+.env
+.trivy-cache
+trivy-results.sarif
+latest-app.zip
