@@ -23,7 +23,7 @@ async function submit() {
   <form class="space-y-4" @submit.prevent="submit">
     <div>
       <label
-        for="login-email-input"
+        for="username"
         class="block text-xs font-bold uppercase text-slate-700"
       >
         Alamat Email
@@ -33,7 +33,7 @@ async function submit() {
       >
         <Mail :size="16" class="text-slate-600" aria-hidden="true" />
         <input
-          id="login-email-input"
+          id="username"
           type="email"
           :value="email"
           placeholder="nama@email.com"
@@ -46,7 +46,7 @@ async function submit() {
 
     <div>
       <label
-        for="login-password-input"
+        for="password"
         class="block text-xs font-bold uppercase text-slate-700"
       >
         Kata Sandi
@@ -56,7 +56,7 @@ async function submit() {
       >
         <Lock :size="16" class="text-slate-600" aria-hidden="true" />
         <input
-          id="login-password-input"
+          id="password"
           type="password"
           :value="password"
           placeholder="••••••••"
@@ -68,7 +68,7 @@ async function submit() {
     </div>
 
     <button
-      id="login-submit-button"
+      id="btn-submit"
       type="submit"
       :disabled="auth.isAuthLogin"
       class="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-700 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-60"
