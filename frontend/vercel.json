@@ -1,6 +1,6 @@
-{
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://GANTI-DENGAN-URL-BACKEND-ANDA/api/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
+   {
+     "rewrites": [
+       { "source": "/api/:path*", "destination": "https://ifs24028-pabwe2026-proyek1.onrender.com/api/:path*" },
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
