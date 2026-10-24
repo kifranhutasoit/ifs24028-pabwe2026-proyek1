@@ -43,4 +43,4 @@ describe('route guard', () => {
       if (typeof route.component === 'function') await route.component()
     }
   })
-})
+})  
