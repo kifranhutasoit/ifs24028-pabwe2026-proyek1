@@ -1,19 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getAccessToken } from './helpers/apiHelper.js'
-import AuthLayout from './features/auth/layouts/AuthLayout.vue'
-import LoginPage from './features/auth/pages/LoginPage.vue'
-import RegisterPage from './features/auth/pages/RegisterPage.vue'
-import ProductLayout from './features/products/layouts/ProductLayout.vue'
-import HomePage from './features/products/pages/HomePage.vue'
-import DetailPage from './features/products/pages/DetailPage.vue'
-import UsersPage from './features/users/pages/UsersPage.vue'
-import ProfilePage from './features/users/pages/ProfilePage.vue'
-import LandingPage from './features/common/pages/LandingPage.vue'
-import AdminLayout from './features/admin/layouts/AdminLayout.vue'
-import AdminDashboardPage from './features/admin/pages/AdminDashboardPage.vue'
-import AdminUsersPage from './features/admin/pages/AdminUsersPage.vue'
-import AdminProductsPage from './features/admin/pages/AdminProductsPage.vue'
-import NotFoundPage from './features/common/pages/NotFoundPage.vue'
+
+// Lazy load: tiap halaman hanya diunduh saat dibutuhkan
+const AuthLayout = () => import('./features/auth/layouts/AuthLayout.vue')
+const LoginPage = () => import('./features/auth/pages/LoginPage.vue')
+const RegisterPage = () => import('./features/auth/pages/RegisterPage.vue')
+
+const ProductLayout = () => import('./features/products/layouts/ProductLayout.vue')
+const HomePage = () => import('./features/products/pages/HomePage.vue')
+const DetailPage = () => import('./features/products/pages/DetailPage.vue')
+
+const UsersPage = () => import('./features/users/pages/UsersPage.vue')
+const ProfilePage = () => import('./features/users/pages/ProfilePage.vue')
+
+const LandingPage = () => import('./features/common/pages/LandingPage.vue')
+const NotFoundPage = () => import('./features/common/pages/NotFoundPage.vue')
+
+const AdminLayout = () => import('./features/admin/layouts/AdminLayout.vue')
+const AdminDashboardPage = () => import('./features/admin/pages/AdminDashboardPage.vue')
+const AdminUsersPage = () => import('./features/admin/pages/AdminUsersPage.vue')
+const AdminProductsPage = () => import('./features/admin/pages/AdminProductsPage.vue')
 
 export const routes = [
   {
