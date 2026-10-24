@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@theme { --font-sans: "Plus Jakarta Sans", system-ui, sans-serif; --color-brand: #0f4c5c; --color-accent: #b4540a; }
+body { @apply text-stone-900 antialiased; background: #f4f1ea; }
+@layer base {
+  button:not(:disabled), [role="tab"], label[for], summary { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+}
+.nav-link { @apply flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2.5 font-semibold text-brand transition hover:bg-brand/10; }
+.nav-link.router-link-exact-active { @apply bg-brand text-white hover:bg-brand; }
