@@ -67,7 +67,7 @@ onMounted(() => load(tabs[0]))
             <span v-else class="absolute left-3 top-3 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900 shadow-sm">Masih tersedia</span>
           </div>
           <div class="flex flex-1 flex-col gap-2 p-4">
-            <p class="text-xs font-bold uppercase tracking-wide text-brand/70">{{ a.category }}</p>
+            <p class="text-xs font-bold uppercase tracking-wide text-brand">{{ a.category }}</p>
             <h2 class="line-clamp-2 min-h-[2.5rem] text-base font-bold leading-snug"><RouterLink :to="`/products/${a.id}`" class="text-stone-900 after:absolute after:inset-0 hover:text-brand">{{ a.title }}</RouterLink></h2>
             <p class="text-xl font-extrabold text-accent">{{ formatRupiah(a.start_bid) }}</p>
             <p class="flex items-center gap-1.5 text-xs text-stone-600"><CalendarClock :size="14" aria-hidden="true" /><span>Dijual hingga {{ formatDate(a.closed_at) }}</span></p>
