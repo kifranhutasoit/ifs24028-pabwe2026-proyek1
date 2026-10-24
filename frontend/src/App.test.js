@@ -14,7 +14,7 @@ async function renderAt(path) {
 describe('App routing', () => {
   it('renders login page', async () => {
     await renderAt('/auth/login')
-    await waitFor(() => expect(document.querySelector('#login-submit-button')).toBeInTheDocument())
+    await waitFor(() => expect(document.querySelector('#btn-submit')).toBeInTheDocument())
   })
 
   it('renders register page', async () => {
